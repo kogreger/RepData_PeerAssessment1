@@ -1,19 +1,25 @@
----
-output:
-  html_document:
-    keep_md: yes
-    self_contained: no
----
 # Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
-```{r loadAndPreprocess, echo = TRUE}
+
+```r
 # load necessary libraries
 library(lattice)
 library(plyr)
 library(reshape)
+```
 
+```
+## 
+## Attaching package: 'reshape'
+## 
+## The following objects are masked from 'package:plyr':
+## 
+##     rename, round_any
+```
+
+```r
 # set working directory
 setwd("~/Documents/Coursera/Data Science Specialization/Reproducible Research/RepData_PeerAssessment1")
 
@@ -27,7 +33,8 @@ data$date <- as.Date(data$date, "%Y-%m-%d")
 
 
 ## What is mean total number of steps taken per day?
-```{r meanTotalNumberOfStepsPerDay, echo = TRUE}
+
+```r
 # calculate total number of steps per day
 sum_data <- ddply(data, c("date"), summarize, 
                   tot_steps = sum(steps, na.rm = TRUE))
@@ -37,9 +44,10 @@ mean_steps <- mean(sum_data$tot_steps, na.rm = TRUE)
 median_steps <- median(sum_data$tot_steps, na.rm = TRUE)
 ```
 
-On average this person has taken ```r format(mean_steps, digits = 2, nsmall = 2, big.mark = ",")``` steps per day during the sample period. The median of the distribution is at ```r format(median_steps, digits = 2, nsmall = 0, big.mark = ",")``` steps per day. The following histogram shows the distribution.
+On average this person has taken ``9,354.23`` steps per day during the sample period. The median of the distribution is at ``10,395`` steps per day. The following histogram shows the distribution.
 
-```{r histTotalNumberOfStepsPerDay, echo = TRUE}
+
+```r
 # draw histogram of total number of steps per day
 hist(sum_data$tot_steps, breaks = 50, 
      col = "blue", 
@@ -48,12 +56,15 @@ hist(sum_data$tot_steps, breaks = 50,
      ylab = "Count")
 ```
 
+![plot of chunk histTotalNumberOfStepsPerDay](./PA1_template_files/figure-html/histTotalNumberOfStepsPerDay.png) 
+
 
 ## What is the average daily activity pattern?
 
 The time series plot below shows the distribution of steps taken per 5-minute time interval over the sample period.
 
-```{r avgDailyActivityPatter, echo = TRUE}
+
+```r
 # calculate average number of steps per interval
 interval_data <- ddply(data, c("interval"), summarize, 
                        mean_steps = mean(steps, na.rm = TRUE))
@@ -65,17 +76,22 @@ with (interval_data, plot(x = interval,
                           main = "Time Series of Average Steps Taken\nper 5-minute Time Interval", 
                           xlab = "5-minute Time Interval", 
                           ylab = "Average Steps Taken"))
+```
 
+![plot of chunk avgDailyActivityPatter](./PA1_template_files/figure-html/avgDailyActivityPatter.png) 
+
+```r
 # identify most active time interval
 interval_data_sort <- interval_data[order(-interval_data$mean_steps), ]
 ```
 
-Over the course of the sample period the most steps were taken during time interval ```r interval_data_sort[1, 1]```, an average of ```r format(interval_data_sort[1, 2], digits = 2, nsmall = 2, big.mark = ",")``` steps.
+Over the course of the sample period the most steps were taken during time interval ``835``, an average of ``206.17`` steps.
 
 
 ## Imputing missing values
 
-```{r imputeMissingValues, echo = TRUE}
+
+```r
 # calculate number of rows with missing values
 missing_data <- sum(is.na(data$steps))
 
@@ -85,9 +101,10 @@ data_impute[is.na(data_impute$steps), "steps"] <-
     data_impute[is.na(data_impute$steps), "mean_steps"]
 ```
 
-A total number of ```r missing_data``` measurements is missing data of steps taken. These values have now been replaced by the average number of steps taken for the respective 5-minute time interval over the sample period. The plot below shows the distribution of steps taken per day of the new imputed data.
+A total number of ``2304`` measurements is missing data of steps taken. These values have now been replaced by the average number of steps taken for the respective 5-minute time interval over the sample period. The plot below shows the distribution of steps taken per day of the new imputed data.
 
-```{r histTotalNumberOfStepsPerDayImpute, echo = TRUE}
+
+```r
 # calculate total number of steps per day for imputed data
 sum_data_impute <- ddply(data_impute, c("date"), summarize, 
                          tot_steps = sum(steps, na.rm = TRUE))
@@ -102,15 +119,17 @@ hist(sum_data_impute$tot_steps, breaks = 50,
      main = "Number of Steps Taken per Day (Imputed Data)", 
      xlab = "Steps Taken", 
      ylab = "Count")
-
 ```
 
-The average number of steps taken has risen from ```r format(mean_steps, digits = 2, nsmall = 2, big.mark = ",")``` steps in the original data to ```r format(mean_steps_impute, digits = 2, nsmall = 2, big.mark = ",")``` steps in the imputed data, the median from ```r format(median_steps, digits = 2, nsmall = 0, big.mark = ",")``` steps in the original data to ```r format(median_steps_impute, digits = 2, nsmall = 0, big.mark = ",")``` steps in the imputed data. This is a logical result of replacing missing values, which do not add to the number of steps, by (albeit) small numbers from the average number of steps per time interval.
+![plot of chunk histTotalNumberOfStepsPerDayImpute](./PA1_template_files/figure-html/histTotalNumberOfStepsPerDayImpute.png) 
+
+The average number of steps taken has risen from ``9,354.23`` steps in the original data to ``10,766.19`` steps in the imputed data, the median from ``10,395`` steps in the original data to ``10,766`` steps in the imputed data. This is a logical result of replacing missing values, which do not add to the number of steps, by (albeit) small numbers from the average number of steps per time interval.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r compWeekdaysWeekends, echo = TRUE}
+
+```r
 # create new factor variable to distinguish weekdays and weekends
 data_impute$weekend <- weekdays(data_impute$date) %in% c("Saturday", "Sunday")
 
@@ -133,5 +152,7 @@ xyplot(value ~ interval | variable, data = interval_data2,
        ylab="Average Steps Taken", 
        xlab="5-minute Time Interval")
 ```
+
+![plot of chunk compWeekdaysWeekends](./PA1_template_files/figure-html/compWeekdaysWeekends.png) 
 
 As it turns out the activity patterns between weekdays and weekends are different. On weekdays, a peak of activity takes place in the morning, whereas on the weekends the activity is spread out more evenly over the day. Also, on weekends activity starts later in the morning and ends later in the evening.
